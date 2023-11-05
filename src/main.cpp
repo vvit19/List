@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <cstdlib>
 
 #include "list.h"
 
@@ -10,17 +11,18 @@ int main()
 
     InsertHead (&list, 18);
 
-    for (int i = 3; i < 9; i++)
+    for (int i = 1; i < 6; i++)
     {
         InsertTail (&list, i);
     }
 
-    ListDelete (&list, 4);
+    InsertAfter  (&list, 10, 3);
+    ListDelete (&list, 2);
+    InsertBefore (&list, 20, 4);
 
-    for (int i = 0; i < MIN_CAPACITY; i++)
-    {
-        printf("%d) Value = %d, Head = %d, Tail = %d, Free = %d\n",
-                i, list.nodes[i].value, list.head, list.tail, list.free);
-        printf("next = %d, prev = %d\n", list.nodes[i].next, list.nodes[i].prev);
-    }
+    FILE* file = fopen("graph.dot", "w");
+    ListDump (&list, file);
+    fclose(file);
+
+    free (list.nodes);
 }

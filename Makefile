@@ -29,3 +29,6 @@ $(OBJ_FOLDER)%.o : $(SRC_FOLDER)%.cpp
 
 clean:
 	rm $(TARGET) $(OBJ)
+
+draw:
+	dot -v -Tpng graph.dot -o graph.png

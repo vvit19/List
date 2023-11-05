@@ -4,10 +4,6 @@
 
 #include "list.h"
 
-const int DUMMY_ELEM    =  0;
-const int PREV_FOR_FREE = -1;
-const int POIZON        =  696969;
-
 static ListErrors VerifyFullList (List* list);
 
 void ListCtor (List* list, int capacity)
@@ -36,6 +32,7 @@ void ListCtor (List* list, int capacity)
     list->head = DUMMY_ELEM;
     list->tail = DUMMY_ELEM;
     list->free = 1;
+    list->linear = true;
 }
 
 ListErrors InsertHead (List* list, elem_t value)
@@ -54,10 +51,14 @@ ListErrors InsertHead (List* list, elem_t value)
     list->nodes[free_elem_id].prev  = DUMMY_ELEM;
     list->head = free_elem_id;
 
-    if (list->tail == DUMMY_ELEM)
+    if (list->size == 0)
     {
         list->tail = free_elem_id;
     }
+
+    list->size++;
+
+    list->linear = false;
 
     return NO_ERROR;
 }
@@ -78,10 +79,12 @@ ListErrors InsertTail (List* list, elem_t value)
     list->nodes[free_elem_id].next  = DUMMY_ELEM;
     list->tail = free_elem_id;
 
-    if (list->head == DUMMY_ELEM)
+    if (list->size == 0)
     {
         list->head = free_elem_id;
     }
+
+    list->size++;
 
     return NO_ERROR;
 }
@@ -97,6 +100,7 @@ ListErrors InsertAfter (List* list, elem_t value, int position)
     if (position >= list->capacity)
     {
         printf ("Position is bigger than capacity!\n");
+
         return POS_BIGGER_THAN_CAPACITY;
     }
 
@@ -110,6 +114,10 @@ ListErrors InsertAfter (List* list, elem_t value, int position)
     list->nodes[free_elem_id].prev  = position;
     list->nodes[free_elem_id].next  = after_position_id;
     list->nodes[free_elem_id].value = value;
+
+    list->size++;
+
+    list->linear = false;
 
     return NO_ERROR;
 }
@@ -139,7 +147,15 @@ ListErrors ListDelete (List* list, int position)
     if (position >= list->capacity)
     {
         printf ("Position is bigger than capacity!\n");
+
         return POS_BIGGER_THAN_CAPACITY;
+    }
+
+    if (list->size == 0)
+    {
+        printf ("No elements to delete\n");
+
+        return INVALID_POSITION_FOR_DELETE;
     }
 
     list->nodes[position].value = POIZON;
@@ -155,6 +171,7 @@ ListErrors ListDelete (List* list, int position)
         {
             list->head = list->nodes[list->head].next;
             list->nodes[list->head].prev = DUMMY_ELEM;
+            list->linear = false;
         }
     }
     else if (position == list->tail)
@@ -166,6 +183,7 @@ ListErrors ListDelete (List* list, int position)
     {
         list->nodes[list->nodes[position].prev].next = list->nodes[position].next;
         list->nodes[list->nodes[position].next].prev = list->nodes[position].prev;
+        list->linear = false;
     }
 
     int free_elem_id = list->free;
@@ -174,7 +192,64 @@ ListErrors ListDelete (List* list, int position)
     list->nodes[list->free].prev = -1;
     list->nodes[list->free].next = free_elem_id;
 
+    list->size--;
+
     return NO_ERROR;
+}
+
+ListErrors ListResize (List* list, int new_capacity)
+{
+    assert (list);
+
+    if ((new_capacity <= list->capacity) || (new_capacity <= 0))
+    {
+        printf ("Invalid new capacity!\n");
+
+        return INVALID_NEW_CAPACITY;
+    }
+
+    list->nodes = (Node*) realloc (list->nodes, sizeof (Node) * new_capacity);
+
+    list->capacity = new_capacity;
+
+    ListLinearise (list);
+
+    return NO_ERROR;
+}
+
+void ListLinearise (List* list)
+{
+    assert (list);
+
+    Node* nodes_copy = (Node*) calloc (list->capacity, sizeof (Node));
+
+    int cur_position = list->head;
+
+    for (int i = 1; i < list->size + 1; i++)
+    {
+        nodes_copy[i].value = list->nodes[cur_position].value;
+        nodes_copy[i].prev  = i - 1;
+        nodes_copy[i].next  = i + 1;
+
+        cur_position = list->nodes[cur_position].next;
+    }
+
+    free (list->nodes);
+    list->nodes = nodes_copy;
+
+    for (int i = list->size + 1; i < list->capacity; i++)
+    {
+        list->nodes[i].value = POIZON;
+        list->nodes[i].prev  = PREV_FOR_FREE;
+        list->nodes[i].next  = i + 1;
+    }
+
+    list->nodes[list->size].next = list->nodes[list->capacity - 1].next = 0;
+
+    list->head   = 1;
+    list->tail   = list->size;
+    list->free   = list->size + 1;
+    list->linear = true;
 }
 
 static ListErrors VerifyFullList (List* list)
