@@ -2,7 +2,7 @@
 #define LIST_H
 
 const int MIN_CAPACITY  =  10;
-const int DUMMY_ELEM    =  0;
+const int FICT_ELEM    =  0;
 const int PREV_FOR_FREE = -1;
 const int POIZON        =  696969;
 
@@ -44,7 +44,6 @@ ListErrors  InsertBefore  (List* list, elem_t value, int position);
 ListErrors  ListDelete    (List* list, int position);
 void        ListLinearise (List* list);
 ListErrors  ListResize    (List* list, int new_capacity);
-void        ListDump      (List* list, FILE* file);
 void        ListDtor      (List* list);
 
 #endif // LIST_H

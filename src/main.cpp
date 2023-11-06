@@ -2,8 +2,11 @@
 #include <cstdlib>
 
 #include "list.h"
+#include "dump.h"
 
-int main()
+#define FUNC_INFO {__PRETTY_FUNCTION__, __FILE__, __LINE__}
+
+int main(int argc, const char** argv)
 {
     List list = {};
 
@@ -16,13 +19,13 @@ int main()
         InsertTail (&list, i);
     }
 
+    ListDump (&list, argv[1], argv[2], FUNC_INFO);
+
     InsertAfter  (&list, 10, 3);
     ListDelete (&list, 2);
     InsertBefore (&list, 20, 4);
 
-    FILE* file = fopen("graph.dot", "w");
-    ListDump (&list, file);
-    fclose(file);
+    ListDump (&list, argv[1], argv[2], FUNC_INFO);
 
     free (list.nodes);
 }

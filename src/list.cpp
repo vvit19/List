@@ -6,6 +6,9 @@
 
 static ListErrors VerifyFullList (List* list);
 
+#define FULL_LIST_VERIFY(list) \
+    if ((VerifyFullList (list)) == LIST_IS_FULL) return LIST_IS_FULL;
+
 void ListCtor (List* list, int capacity)
 {
     assert (list);
@@ -22,15 +25,15 @@ void ListCtor (List* list, int capacity)
         list->nodes[i].value = POIZON;
     }
 
-    list->nodes[DUMMY_ELEM].next = DUMMY_ELEM;
-    list->nodes[DUMMY_ELEM].prev = DUMMY_ELEM;
+    list->nodes[FICT_ELEM].next = FICT_ELEM;
+    list->nodes[FICT_ELEM].prev = FICT_ELEM;
 
-    list->nodes[capacity - 1].next  = DUMMY_ELEM;
+    list->nodes[capacity - 1].next  = FICT_ELEM;
     list->nodes[capacity - 1].prev  = PREV_FOR_FREE;
     list->nodes[capacity - 1].value = POIZON;
 
-    list->head = DUMMY_ELEM;
-    list->tail = DUMMY_ELEM;
+    list->head = FICT_ELEM;
+    list->tail = FICT_ELEM;
     list->free = 1;
     list->linear = true;
 }
@@ -39,7 +42,7 @@ ListErrors InsertHead (List* list, elem_t value)
 {
     assert (list);
 
-    if ((VerifyFullList (list)) == LIST_IS_FULL) return LIST_IS_FULL;
+    FULL_LIST_VERIFY(list)
 
     int free_elem_id = list->free;
     list->free = list->nodes[list->free].next;
@@ -48,7 +51,7 @@ ListErrors InsertHead (List* list, elem_t value)
 
     list->nodes[free_elem_id].value = value;
     list->nodes[free_elem_id].next  = list->head;
-    list->nodes[free_elem_id].prev  = DUMMY_ELEM;
+    list->nodes[free_elem_id].prev  = FICT_ELEM;
     list->head = free_elem_id;
 
     if (list->size == 0)
@@ -67,7 +70,7 @@ ListErrors InsertTail (List* list, elem_t value)
 {
     assert (list);
 
-    if ((VerifyFullList (list)) == LIST_IS_FULL) return LIST_IS_FULL;
+    FULL_LIST_VERIFY(list)
 
     int free_elem_id = list->free;
     list->free = list->nodes[list->free].next;
@@ -76,7 +79,7 @@ ListErrors InsertTail (List* list, elem_t value)
 
     list->nodes[free_elem_id].value = value;
     list->nodes[free_elem_id].prev  = list->tail;
-    list->nodes[free_elem_id].next  = DUMMY_ELEM;
+    list->nodes[free_elem_id].next  = FICT_ELEM;
     list->tail = free_elem_id;
 
     if (list->size == 0)
@@ -93,7 +96,7 @@ ListErrors InsertAfter (List* list, elem_t value, int position)
 {
     assert (list);
 
-    if ((VerifyFullList (list)) == LIST_IS_FULL) return LIST_IS_FULL;
+    FULL_LIST_VERIFY(list)
 
     if (position == list->tail) return InsertTail (list, value);
 
@@ -126,7 +129,7 @@ ListErrors InsertBefore (List* list, elem_t value, int position)
 {
     assert (list);
 
-    if ((VerifyFullList (list)) == LIST_IS_FULL) return LIST_IS_FULL;
+    FULL_LIST_VERIFY(list)
 
     if (position == list->head) return InsertHead (list, value);
 
@@ -164,20 +167,20 @@ ListErrors ListDelete (List* list, int position)
     {
         if (list->head == list->tail) // One element in list
         {
-            list->tail = DUMMY_ELEM;
-            list->head = DUMMY_ELEM;
+            list->tail = FICT_ELEM;
+            list->head = FICT_ELEM;
         }
         else
         {
             list->head = list->nodes[list->head].next;
-            list->nodes[list->head].prev = DUMMY_ELEM;
+            list->nodes[list->head].prev = FICT_ELEM;
             list->linear = false;
         }
     }
     else if (position == list->tail)
     {
         list->tail = list->nodes[list->tail].prev;
-        list->nodes[list->tail].next = DUMMY_ELEM;
+        list->nodes[list->tail].next = FICT_ELEM;
     }
     else
     {
