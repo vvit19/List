@@ -18,6 +18,7 @@ void ListDump (List* list, const char* dot_file, const char* log_file, function_
     static int dump_number = 1;
 
     FILE* file = fopen (dot_file, "w");
+    assert (file);
 
     $print ("digraph G { rankdir = TB\n" "splines = ortho; edge[minlen = 3, penwidth = 3];\n\n");
 
@@ -79,6 +80,7 @@ void ListDump (List* list, const char* dot_file, const char* log_file, function_
     system (shell_command);
 
     file = fopen (log_file, "a");
+    assert (file);
 
     $print ("<pre>\n<font size=5>\n"
             "Called from file: %s, function: %s, line: %d\n"

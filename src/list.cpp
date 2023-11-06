@@ -58,10 +58,12 @@ ListErrors InsertHead (List* list, elem_t value)
     {
         list->tail = free_elem_id;
     }
+    else
+    {
+        list->linear = false;
+    }
 
     list->size++;
-
-    list->linear = false;
 
     return NO_ERROR;
 }
@@ -192,7 +194,7 @@ ListErrors ListDelete (List* list, int position)
     int free_elem_id = list->free;
 
     list->free = position;
-    list->nodes[list->free].prev = -1;
+    list->nodes[list->free].prev = PREV_FOR_FREE;
     list->nodes[list->free].next = free_elem_id;
 
     list->size--;
@@ -253,6 +255,17 @@ void ListLinearise (List* list)
     list->tail   = list->size;
     list->free   = list->size + 1;
     list->linear = true;
+}
+
+void ListDtor (List* list)
+{
+    assert (list);
+
+    free (list->nodes);
+    list->nodes = nullptr;
+
+    list->capacity = list->free = list->head = list->size = list->tail = POIZON;
+    list->linear = false;
 }
 
 static ListErrors VerifyFullList (List* list)

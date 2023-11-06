@@ -6,7 +6,7 @@
 
 #define FUNC_INFO {__PRETTY_FUNCTION__, __FILE__, __LINE__}
 
-int main(int argc, const char** argv)
+int main (int /*argc*/, const char** argv)
 {
     List list = {};
 
@@ -27,5 +27,9 @@ int main(int argc, const char** argv)
 
     ListDump (&list, argv[1], argv[2], FUNC_INFO);
 
-    free (list.nodes);
+    ListResize (&list, 14);
+
+    ListDump (&list, argv[1], argv[2], FUNC_INFO);
+
+    ListDtor (&list);
 }
